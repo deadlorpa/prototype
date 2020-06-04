@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-backSub = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
+backSub = cv2.createBackgroundSubtractorMOG2(history=20, detectShadows=True)
 erode_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
 
