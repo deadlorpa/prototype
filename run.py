@@ -6,14 +6,15 @@ import sys
 import  os
 from threading import Thread
 import mail
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, QCoreApplication, pyqtSlot, QObject
-from PyQt5.QtGui import QPixmap, QImage, QKeySequence
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLabel, QShortcut, QPushButton
+from PyQt5.QtGui import QPixmap, QImage, QKeySequence, QIcon
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLabel, QShortcut, QPushButton, QTabBar, QTabWidget, \
+    QListWidgetItem
 import time
 import motion_detector as detector
 import face_detector as face_detector
-import ui.main_v2 as mainWindow
+import ui.main as mainWindow
 from datetime import datetime
 
 
@@ -74,11 +75,12 @@ def CreateAnomaly(frame, type, camera_link):
     window.show()
 
 def SendAnomaly():
+    reciever = window.mail_edit.text()
     for anomal in anomalyes:
         if anomal.page is window.anoms.currentWidget():
             open(anomal.img, 'a').close()
             cv2.imwrite(anomal.img, anomal.frame)
-            mail.sendSelected(anomal)
+            mail.sendSelected(anomal, reciever)
             break
 
 def DeleteAnomaly(anomal):
@@ -89,7 +91,11 @@ def DeleteAnomaly(anomal):
     window.anoms.removeTab(window.anoms.currentIndex())
 
 def SendAllAnomalies():
-    print("a")
+    reciever = window.mail_edit.text()
+    for anomal in anomalyes:
+            open(anomal.img, 'a').close()
+            cv2.imwrite(anomal.img, anomal.frame)
+    mail.send(reciever)
 
 class CameraWidget(QWidget):
     """Independent camera feed
@@ -259,40 +265,43 @@ def UpdateCurrentDiscription():
 def UpdateButtonsState():
     if(len(anomalyes)>0):
         window.delete_current_anom.setEnabled(True)
-        window.save_current_anom.setEnabled(True)
-        window.save_config_2.setEnabled(True)
+        #window.save_current_anom.setEnabled(True)
+        window.save_config.setEnabled(True)
     else:
         window.delete_current_anom.setEnabled(False)
-        window.save_current_anom.setEnabled(False)
-        window.save_config_2.setEnabled(False)
+        #window.save_current_anom.setEnabled(False)
+        window.save_config.setEnabled(False)
     if(window.checkBox_7.isChecked() and window.cb_notify.isChecked() and len(anomalyes)>0):
-        window.save_current_anom.setEnabled(True)
-        window.save_config_2.setEnabled(True)
+       # window.save_current_anom.setEnabled(True)
+        window.save_config.setEnabled(True)
     else:
-        window.save_current_anom.setEnabled(False)
-        window.save_config_2.setEnabled(False)
+       # window.save_current_anom.setEnabled(False)
+        window.save_config.setEnabled(False)
 
+def StackChange():
+    window.stack.setCurrentIndex(window.listWidget.currentRow())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ExampleApp()
+    window.setStyleSheet(open('src/style.qss').read())
+
     #mail.send()
     window.saveBut.clicked.connect(UpdateButtonsState)
-    window.save_current_anom.clicked.connect(SendAnomaly)
-    window.save_config_2.clicked.connect(SendAllAnomalies)
+    window.setWindowIcon(QIcon("src/icons/icon-binoculars_87999.png"))
+    window.listWidget.addItem(QListWidgetItem(QIcon("src/icons/icon-cctv_87969.png"), "Камеры"))
+    window.listWidget.addItem(QListWidgetItem(QIcon("src/icons/icon-computer_87932.png"), "Аномалии"))
+    window.listWidget.addItem(QListWidgetItem(QIcon("src/icons/icon-idea_87988.png"), "Уведомления"))
+    window.listWidget.clicked.connect(StackChange)
+    window.save_config.clicked.connect(SendAllAnomalies)
     window.delete_current_anom.clicked.connect(DeleteAnomaly)
     window.add.clicked.connect(AddCameraButtonClicked)
     window.dele.clicked.connect(DelCameraButtonClicked)
     window.camers_nav.currentChanged.connect(UpdateCurrentDiscription)
-    #zero = CameraWidget(stream_link='http://82.245.253.25:85/mjpg/video.mjpg')
-    #fst = CameraWidget(stream_link='http://176.180.45.18:8082/mjpg/video.mjpg')
-    my = CameraWidget(ip='нет данных', port='нет данных', disc='моя веб-камера')
-    camers.append(my)
-    #window.camers_nav.addTab(zero.get_video_frame(), "test")
-    #window.camers_nav.addTab(fst.get_video_frame(), fst.camera_stream_link)
-    #http://208.13.138.36/mjpg/video.mjpg
-    window.camers_nav.addTab(my.get_video_frame(), 'me')
-    my.get_video_frame().setAlignment(Qt.AlignCenter)
+   # my = CameraWidget(ip='нет данных', port='нет данных', disc='моя веб-камера')
+   # camers.append(my)
+   # window.camers_nav.addTab(my.get_video_frame(), 'me')
+   # my.get_video_frame().setAlignment(Qt.AlignCenter)
     window.show()
     #'http://82.245.253.25:85/mjpg/video.mjpg' ПРАЧЕЧНАЯ 1
     #'http://176.180.45.18:8082/mjpg/video.mjpg' ПРАЧЕЧНАЯ 2

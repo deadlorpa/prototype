@@ -10,12 +10,12 @@ from email.mime.text import MIMEText
 from email import encoders
 from run import Anomaly
 
-def sendSelected(anomal):
+def sendSelected(anomal, reciever):
 
     part =MIMEText('В данном письме представлен кадр с аномалией от ' + anomal.date.strftime("%Y-%m-%d %H:%M:%S"))
     msg = MIMEMultipart()
     msg['From'] = "deadlorpa@gmail.com"
-    msg['To'] = "deadlorpa@gmail.com"
+    msg['To'] = reciever
     msg.attach(part)
     for root, dirs, files in os.walk('anomal'):  # Список всех файлов и папок в директории folder
         for file in files:
@@ -27,10 +27,10 @@ def sendSelected(anomal):
     smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
     smtpObj.starttls()
     smtpObj.login('deadlorpa@gmail.com', 'MyDeadL0RPA')
-    smtpObj.sendmail("deadlorpa@gmail.com", "deadlorpa@gmail.com", msg.as_string())
+    smtpObj.sendmail("deadlorpa@gmail.com", reciever, msg.as_string())
     smtpObj.quit()
 
-def send():
+def send(reciever):
 
     # Проверяем, существует ли файл
     if path.exists("anomal"):
@@ -53,12 +53,12 @@ def send():
     # Compose message
     msg = MIMEMultipart()
     msg['From'] = "deadlorpa@gmail.com"
-    msg['To'] = "deadlorpa@gmail.com"
+    msg['To'] = reciever
     msg.attach(part)
     msg.attach(part1)
 
     smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
     smtpObj.starttls()
     smtpObj.login('deadlorpa@gmail.com', 'MyDeadL0RPA')
-    smtpObj.sendmail("deadlorpa@gmail.com", "deadlorpa@gmail.com", msg.as_string())
+    smtpObj.sendmail("deadlorpa@gmail.com", reciever, msg.as_string())
     smtpObj.quit()

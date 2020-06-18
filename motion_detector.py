@@ -47,10 +47,12 @@ class Detector():
         origin = frame
         # ---- version 1 ----
         frame = self.backSub.apply(frame)
-
+        #cv2.imshow('1',frame)
         _, thresh = cv2.threshold(frame, 244, 255, cv2.THRESH_BINARY)
         cv2.erode(thresh, self.erode_kernel, thresh, iterations=2)
         cv2.dilate(thresh, self.dilate_kernel, thresh, iterations=2)
+        #cv2.imshow('2', thresh)
+
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         i = 0
@@ -61,5 +63,6 @@ class Detector():
             cv2.rectangle(origin, (x, y), (x + w, y + h), color, 2)
             i += 1
         flag_found = i > 0
+        #cv2.imshow('4', origin)
         #cv2.imshow('7',origin)
         return flag_found, origin
